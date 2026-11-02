@@ -10,7 +10,7 @@
 - UI 설계서의 18개 화면 탐색·확대와 모바일 표현
 - Front → Gateway → API 및 AWS HA 목표 아키텍처
 - Infrastructure Composer·CloudFormation·EC2 Auto Scaling 설계 방향
-- 단계별 제출 일정과 [WBS 초안](docs/WBS.md)
+- 단계별 제출 일정과 [통합 WBS](https://github.com/2026-2-web-programming-term-project/.github/blob/main/docs/WBS.md)
 - 서비스 저장소, 현재 기술 설정과 공식 참고 문서
 
 UI 화면의 데이터는 예시입니다. 인프라·HA는 설계 목표이며 AWS 배포와 처리 성능을 검증한 상태가 아닙니다. 실제 Spring 서비스와 소개 사이트는 별도 배포 대상입니다.
@@ -22,7 +22,7 @@ index.html       문서와 레이아웃
 styles.css       반응형 스타일
 app.js           UI 화면 탐색·확대·목차 표시
 assets/ui/       UI 설계서 원본 와이어프레임
-docs/WBS.md      작업 계획
+docs/WBS.md      통합 WBS 안내 링크
 .nojekyll        정적 파일 게시
 ```
 
