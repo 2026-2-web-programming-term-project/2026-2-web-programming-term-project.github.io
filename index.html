@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#142b40">
+  <meta name="description" content="연구실 GPU 서버 자원 예약 및 실시간 모니터링 시스템. UI 설계, 개발 일정, AWS Infrastructure Composer 기반 IaC와 HA 아키텍처의 목표와 현재 상태를 소개합니다.">
+  <title>연구실 GPU 자원 예약 시스템 · 프로젝트 문서</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="GPU 자원 예약 시스템 처음으로"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>GPU Resource<span class="brand-sub">PROJECT DOCUMENTATION</span></span></a>
+    <div class="topbar-right"><span class="development"><span></span>개발 중</span><a class="github-link" href="https://github.com/2026-2-web-programming-term-project">GitHub <span aria-hidden="true">↗</span></a></div>
+  </header>
+
+  <div class="page-shell">
+    <aside class="sidebar">
+      <span class="sidebar-heading">PROJECT GUIDE</span>
+      <nav aria-label="문서 목차">
+        <a href="#overview" aria-current="location"><span>01</span>프로젝트 개요</a>
+        <a href="#features"><span>02</span>기능과 사용자</a>
+        <a href="#screens"><span>03</span>UI 설계 둘러보기</a>
+        <a href="#architecture"><span>04</span>시스템 아키텍처</a>
+        <a href="#infrastructure"><span>05</span>인프라와 IaC</a>
+        <a href="#roadmap"><span>06</span>개발 일정과 WBS</a>
+        <a href="#repositories"><span>07</span>저장소와 기술</a>
+      </nav>
+      <div class="sidebar-note"><span class="tiny-label">2026 · 2학기</span><p>웹 프로그래밍<br>텀프로젝트</p><a href="https://github.com/2026-2-web-programming-term-project/.github#readme">공통 README ↗</a></div>
+    </aside>
+
+    <main id="main">
+      <section id="overview" class="hero section-anchor" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span>LAB INFRASTRUCTURE / WEB APPLICATION</div>
+          <h1 id="hero-title">연구실 GPU 자원,<br><span>예약부터 모니터링까지.</span></h1>
+          <p class="hero-description">누가 사용하고 있는지 확인하고, 필요한 시간을 예약합니다.<br class="desktop-break">연구실이 보유한 GPU 서버와 노드를 함께 사용하는 웹 시스템입니다.</p>
+          <div class="hero-actions"><a class="button primary" href="#screens">UI 설계 살펴보기 <span aria-hidden="true">↓</span></a><a class="button secondary" href="#architecture">아키텍처 보기 <span aria-hidden="true">↗</span></a></div>
+          <div class="hero-facts"><div><strong>18</strong><span>설계 화면·팝업·반응형</span></div><div><strong>05</strong><span>서비스 저장소</span></div><div><strong>03</strong><span>제출 단계</span></div></div>
+        </div>
+        <div class="hero-blueprint" aria-label="설계 목표 개념도. 연구실 GPU 상태를 수집하는 웹 애플리케이션을 다중 가용 영역으로 배치할 계획입니다.">
+          <div class="blueprint-bar"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>infrastructure.plan</span><span class="outline-label">DESIGN</span></div>
+          <div class="blueprint-content">
+            <div class="blueprint-title"><span class="tiny-label">APPLICATION LAYER</span><strong>분산해서 처리하고,<br>상태는 함께 관리합니다.</strong></div>
+            <div class="az-mini"><div><span>AVAILABILITY ZONE A</span><i></i><b>Application</b><small>EC2 Auto Scaling</small></div><div><span>AVAILABILITY ZONE B</span><i></i><b>Application</b><small>EC2 Auto Scaling</small></div></div>
+            <div class="blueprint-connector" aria-hidden="true"></div>
+            <div class="gpu-mini"><span class="server-icon" aria-hidden="true">▤</span><div><span class="tiny-label">RESEARCH LAB</span><b>예약 대상 GPU 서버·노드</b></div><span class="subtle-pill">상태 수집</span></div>
+            <p class="blueprint-caption">목표 구성 · 실제 배포 상태를 나타내지 않습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="status-line"><span class="status-icon" aria-hidden="true">i</span><p><strong>설계와 구현 상태를 구분합니다.</strong> 현재 서비스는 초기 프로젝트 구성 단계이며, AWS 배포·HA·처리 성능은 검증 예정입니다.</p><span class="snapshot">기준 2026.11.02</span></div>
+
+      <section id="features" class="content-section section-anchor" aria-labelledby="features-title">
+        <div class="section-heading"><span class="section-number">02 / SCOPE</span><h2 id="features-title">자원을 확인하고, 예약하고, 운영하는 흐름</h2><p>연구실 구성원과 관리자가 같은 자원 정보를 각자의 권한으로 사용합니다.</p></div>
+        <div class="role-columns">
+          <article class="role-panel"><div class="panel-eyebrow"><span class="role-icon" aria-hidden="true">U</span>일반 사용자</div><h3>내 실험에 필요한 시간을 예약합니다.</h3><ol class="flow-list"><li><b>가입과 인증</b><span>연구실 초대 코드와 이메일로 소속을 확인합니다.</span></li><li><b>자원 확인</b><span>실제 상태·갱신 시각·예정된 예약을 확인합니다.</span></li><li><b>예약과 변경</b><span>빈 시간을 선택하고 수정·취소·조기 종료합니다.</span></li><li><b>알림과 이력</b><span>관련 알림과 본인의 예약 시간을 확인합니다.</span></li></ol></article>
+          <article class="role-panel admin-panel"><div class="panel-eyebrow"><span class="role-icon" aria-hidden="true">A</span>관리자</div><h3>연구실의 자원과 사용 규칙을 관리합니다.</h3><ol class="flow-list"><li><b>자원 운영</b><span>서버·GPU 노드를 등록하고 점검 상태를 관리합니다.</span></li><li><b>예약 운영</b><span>소속 연구실 예약을 조회하고 사유를 남겨 취소합니다.</span></li><li><b>회원과 정책</b><span>역할·이용 상태·초대 코드·예약 정책을 관리합니다.</span></li><li><b>예약 통계</b><span>자원별·회원별 예약 시간과 가동률을 확인합니다.</span></li></ol></article>
+        </div>
+        <div class="feature-strip"><article><span>01</span><h3>실제 상태와 예약 상태</h3><p>GPU 사용 상태와 예약 시간표를 나누어 표시합니다. 수신이 끊기면 마지막 갱신 시각을 유지합니다.</p></article><article><span>02</span><h3>예약의 정합성</h3><p>저장 직전에 중복·권한·정책을 다시 검사하고, 다중 인스턴스의 동시 요청도 검증합니다.</p></article><article><span>03</span><h3>연구실 단위의 권한</h3><p>조회와 변경 모두 소속 연구실을 기준으로 제한합니다. 관리자는 일반 사용자 기능도 이용합니다.</p></article></div>
+        <details class="plain-details"><summary>예약·알림·통계의 범위와 정책 제안값</summary><div class="details-content"><ul><li>예약 처리로 GPU 작업을 자동 실행하거나 강제로 중지하지 않습니다.</li><li>조기 종료 대기는 알림 신청이며 자동 예약이나 우선 배정을 뜻하지 않습니다.</li><li>통계는 예약 시간 기준입니다. 실제 GPU 연산 부하와 구분합니다.</li><li>예약 1시간 단위·최대 연속 8시간, 시작·종료 10분 전 알림은 UI 설계서의 제안값입니다.</li><li>인증 번호 6자리·10분 유효·재발송 대기 60초도 운영 전 확정할 제안값입니다.</li></ul></div></details>
+      </section>
+
+      <section id="screens" class="content-section section-anchor" aria-labelledby="screens-title">
+        <div class="section-heading"><span class="section-number">03 / INTERFACE</span><h2 id="screens-title">화면으로 살펴보는 사용자 경험</h2><p>UI 설계서의 원본 와이어프레임입니다. 화면의 데이터와 수치는 설명용 예시입니다.</p></div>
+        <div class="screen-explorer">
+          <div class="screen-filters" role="group" aria-label="화면 분류"><button class="filter active" data-filter="all" aria-pressed="true">전체 <span>18</span></button><button class="filter" data-filter="common" aria-pressed="false">공통 <span>3</span></button><button class="filter" data-filter="user" aria-pressed="false">사용자 <span>8</span></button><button class="filter" data-filter="admin" aria-pressed="false">관리자 <span>5</span></button><button class="filter" data-filter="mobile" aria-pressed="false">모바일 <span>2</span></button></div>
+          <div class="screen-layout"><div class="screen-list" id="screen-list" role="group" aria-label="설계 화면 선택"></div><div class="screen-detail" id="screen-detail" aria-live="polite"><div class="screen-detail-heading"><div><span class="screen-code" id="screen-code">U01</span><h3 id="screen-title">자원 모니터링 대시보드</h3></div><button class="text-button" id="zoom-screen" type="button">크게 보기 <span aria-hidden="true">↗</span></button></div><div class="screen-image-wrap"><img id="screen-image" src="assets/ui/U01.png" alt="U01 자원 모니터링 대시보드 와이어프레임" width="1440" height="760" loading="lazy"></div><p class="screen-description" id="screen-description">소속 연구실 자원의 상태와 마지막 갱신 시각을 확인하고 예약 화면으로 이동합니다.</p><div class="screen-pagination"><span id="screen-position">설계 화면</span><div><button id="previous-screen" aria-label="이전 설계 화면" type="button">←</button><button id="next-screen" aria-label="다음 설계 화면" type="button">→</button></div></div></div></div>
+        </div>
+        <p class="section-footnote">M01·M02는 U01·U04의 모바일 표현입니다. 별개의 예약 로직을 만드는 대신 같은 기능과 정책을 반응형 화면에 적용합니다.</p>
+        <noscript><p>화면 탐색 기능은 JavaScript가 필요합니다. <a href="assets/ui/U01.png">대시보드</a>와 <a href="assets/ui/U04.png">예약 입력 화면</a>은 이미지로도 확인할 수 있습니다.</p></noscript>
+      </section>
+
+      <section id="architecture" class="content-section section-anchor" aria-labelledby="architecture-title">
+        <div class="section-heading"><span class="section-number">04 / ARCHITECTURE</span><h2 id="architecture-title">요청을 처리하는 계층과 자원을 분리합니다.</h2><p>Front → Gateway → API 흐름을 바탕으로 한 목표 구성입니다. 연결 방식과 서비스 발견 전략은 상세 설계에서 확정합니다.</p></div>
+        <div class="architecture-board">
+          <div class="board-top"><span class="board-title"><i></i>목표 아키텍처</span><span class="tag planned">설계 예정</span></div>
+          <div class="browser-node"><span aria-hidden="true">◉</span>사용자 브라우저</div><div class="flow-arrow">HTTPS :443 <span aria-hidden="true">↓</span></div><div class="alb-node"><strong>Application Load Balancer</strong><span>ACM 인증서 · 외부 TLS 종료 우선안</span></div><div class="flow-arrow" aria-hidden="true">↓</div>
+          <div class="vpc-boundary"><div class="boundary-label">VPC / PRIVATE APPLICATION TIERS</div><div class="az-headings"><span>가용 영역 A</span><span>가용 영역 B</span></div><div class="tier-row"><span class="tier-name">Front</span><div class="instance"><i></i>Front instance</div><div class="instance"><i></i>Front instance</div><span class="tier-badge">ASG</span></div><div class="tier-connector" aria-hidden="true">↓</div><div class="tier-row"><span class="tier-name">Gateway</span><div class="instance"><i></i>Gateway instance</div><div class="instance"><i></i>Gateway instance</div><span class="tier-badge">ASG</span></div><div class="tier-connector" aria-hidden="true">↓</div><div class="tier-row"><span class="tier-name">API</span><div class="instance"><i></i>API instance</div><div class="instance"><i></i>API instance</div><span class="tier-badge">ASG</span></div><div class="tier-connector" aria-hidden="true">↓</div><div class="data-tiers"><div><b>예약 데이터 저장소</b><span>Multi-AZ 등 장애 복구 방식 검토</span></div><div><b>공유 상태·알림</b><span>세션·이벤트·실시간 연결 방식 검토</span></div></div><p class="board-caption">인스턴스 수·크기·스케일링 목표값·내부 로드밸런싱 방식은 미정입니다. 실제 AWS 배포를 나타내지 않습니다.</p></div>
+          <div class="lab-boundary"><span class="lab-label">RESEARCH LAB</span><div><b>예약 대상 GPU 서버·노드</b><p>실제 상태 수집 → API 반영 → 화면 갱신</p></div><span class="tag">수집 경로 설계 예정</span></div>
+        </div>
+        <div class="architecture-notes"><article><span>BOUNDARY 01</span><h3>공용 진입점과 TLS</h3><p>ALB와 ACM을 도입하면 외부 TLS 연결은 ALB에서 종료합니다. 내부 HTTP·HTTPS 적용과 신뢰할 프록시 범위는 네트워크 경계에 맞춰 정합니다.</p></article><article><span>BOUNDARY 02</span><h3>서비스 발견과 요청 분산</h3><p>Eureka는 서비스 주소를 등록·조회합니다. 업무 요청이 통과하는 프록시는 아닙니다. 다중화와 내부 로드밸런서의 역할 분담을 확정합니다.</p></article><article><span>BOUNDARY 03</span><h3>웹 처리량과 GPU 용량</h3><p>웹 서비스 인스턴스를 늘리는 것과 연구실 GPU 장비를 늘리는 것은 별개의 용량 계획입니다. 예약 대상 GPU를 웹 ASG와 구분합니다.</p></article></div>
+      </section>
+
+      <section id="infrastructure" class="content-section section-anchor" aria-labelledby="infra-title">
+        <div class="section-heading"><span class="section-number">05 / INFRASTRUCTURE AS CODE</span><h2 id="infra-title">구성을 코드로 남기고, 동작으로 검증합니다.</h2><p>AWS Infrastructure Composer로 설계를 시각화하고 CloudFormation 템플릿을 Git으로 관리할 계획입니다.</p></div>
+        <div class="iac-layout"><div class="iac-process"><div><span>01</span><h3>설계와 시각화</h3><p>CloudFormation 콘솔 또는 VS Code 연동에서 네트워크·의존 관계를 정리합니다.</p></div><div><span>02</span><h3>템플릿과 환경 분리</h3><p>YAML/JSON과 환경별 파라미터를 버전 관리합니다. 스택 분리 단위를 확정합니다.</p></div><div><span>03</span><h3>변경 검토와 배포</h3><p>변경 내용을 검토하고 재현 가능한 배포·롤백 절차를 정리합니다.</p></div><div><span>04</span><h3>장애와 부하 검증</h3><p>계획한 구조와 실제 배포 결과를 비교하고 측정 기록을 남깁니다.</p></div></div><div class="code-panel"><div class="code-panel-top"><span>INFRASTRUCTURE / PROPOSED STRUCTURE</span><span>예시</span></div><pre><code><span class="code-comment"># 목표 디렉터리 구조 · 아직 미작성</span>
+infra/
+├── network.yaml        <span class="code-comment"># VPC · subnets · SG</span>
+├── ingress.yaml        <span class="code-comment"># ALB · target groups</span>
+├── compute.yaml        <span class="code-comment"># launch template · ASG</span>
+├── data.yaml           <span class="code-comment"># data layer</span>
+└── parameters/
+    ├── development.json
+    └── production.json</code></pre><p>템플릿 저장소·실제 파일 구성은 설계 과정에서 확정합니다. 이 구조는 배포 가능한 템플릿이 아닙니다.</p></div></div>
+        <div class="table-wrap"><table class="spec-table"><caption>인프라 구성별 목표와 확인 사항</caption><thead><tr><th scope="col">구성</th><th scope="col">설계 방향</th><th scope="col">확인할 내용</th></tr></thead><tbody><tr><th scope="row">네트워크</th><td>두 개 이상 가용 영역, 공용 진입점·사설 애플리케이션 계층</td><td>서브넷·라우팅·통신 허용 범위</td></tr><tr><th scope="row">ALB · ACM</th><td>HTTPS 진입과 건강한 대상에 요청 분산</td><td>리스너·인증서·readiness·연결 종료</td></tr><tr><th scope="row">EC2 Auto Scaling</th><td>계층별 수평 확장과 인스턴스 교체</td><td>CPU·요청량 등 지표, 목표값·warmup</td></tr><tr><th scope="row">데이터 계층</th><td>DB 전환·복구와 예약 정합성 유지</td><td>RDS Multi-AZ 등 대안, 연결 재수립·백업</td></tr><tr><th scope="row">공유 상태·알림</th><td>인스턴스 교체와 다중 실행에 대응</td><td>세션 저장, WebSocket 재연결, 중복 이벤트·배치</td></tr><tr><th scope="row">서비스 발견</th><td>ASG 증감과 디스커버리 장애에 대응</td><td>Eureka peer 구성·복수 주소·내부 LB 역할</td></tr><tr><th scope="row">관측과 운영</th><td>장애 징후와 배포 영향을 확인</td><td>로그·메트릭·알람, 배포·롤백 절차</td></tr></tbody></table></div>
+        <div class="validation-panel"><div><span class="section-number">VALIDATION PLAN</span><h3>“버틴다”는 말에 측정 근거를 붙입니다.</h3><p>처리량과 가용성은 아직 측정하지 않았습니다. 부하 시나리오와 합격 기준을 정한 뒤 결과를 공개합니다.</p></div><ul><li><span>성능</span><b>처리량 · 동시 사용자 · p95 · 오류율</b><small>목표값 미정 / 측정 예정</small></li><li><span>복구</span><b>인스턴스·AZ·DB 장애 시 요청 영향</b><small>복구 기준 미정 / 검증 예정</small></li><li><span>정합성</span><b>동시 예약 · 중복 알림 · 세션 연속성</b><small>다중 인스턴스 검증 예정</small></li></ul></div>
+        <details class="plain-details"><summary>설계 판단에 참고하는 AWS 공식 문서</summary><div class="details-content source-links"><a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/infrastructure-composer-for-cloudformation.html">Infrastructure Composer와 CloudFormation ↗</a><a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-add-az-console.html">Auto Scaling의 다중 가용 영역 배치 ↗</a><a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html">ALB HTTPS 리스너와 TLS 종료 ↗</a><a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html">목표 추적 스케일링과 지표 ↗</a><a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html">RDS Multi-AZ 배포 방식 ↗</a></div></details>
+      </section>
+
+      <section id="roadmap" class="content-section section-anchor" aria-labelledby="roadmap-title">
+        <div class="section-heading"><span class="section-number">06 / ROADMAP</span><h2 id="roadmap-title">세 번의 제출, 하나의 서비스로 연결합니다.</h2><p>화면 → JavaScript 동작 → 실제 API 연동 순서입니다. 모든 마감은 한국 표준시(KST) 기준입니다.</p></div>
+        <div class="milestones"><article class="milestone current"><span class="milestone-stage">PHASE 01 · HTML / CSS</span><time datetime="2026-11-06T23:59:00+09:00">11.06 <span>금요일</span></time><span class="deadline-time">2026 · 23:59 KST</span><h3>프론트엔드 화면</h3><p>공통 레이아웃, 인증·예약·관리 화면과 모바일 표현을 구현합니다.</p><span class="tag planned">현재 제출 단계</span></article><article class="milestone"><span class="milestone-stage">PHASE 02 · JAVASCRIPT</span><time datetime="2026-11-20T23:59:00+09:00">11.20 <span>금요일</span></time><span class="deadline-time">2026 · 23:59 KST</span><h3>화면 동작과 검증</h3><p>폼·필터·캘린더·팝업을 구현하고 목업 데이터와 API 형식을 검증합니다.</p><span class="tag">예정</span></article><article class="milestone"><span class="milestone-stage">PHASE 03 · BACKEND</span><time datetime="2026-12-04T23:59:00+09:00">12.04 <span>금요일</span></time><span class="deadline-time">2026 · 23:59 KST</span><h3>백엔드와 실제 연동</h3><p>인증·예약·실시간 처리와 데이터 저장을 연결하고 통합 검증합니다.</p><span class="tag">예정</span></article></div>
+        <div class="wbs-preview"><div><span class="tiny-label">WORK BREAKDOWN STRUCTURE</span><h3>화면 ID와 완료 기준을 작업에 연결합니다.</h3><p>프론트엔드·JS·백엔드와 병행 인프라 작업을 구분합니다. 세부 목표일은 계획이며, 진행 상태는 WBS 문서에서 관리합니다.</p></div><a class="button secondary" href="https://github.com/2026-2-web-programming-term-project/2026-2-web-programming-term-project.github.io/blob/main/docs/WBS.md">상세 WBS 보기 <span aria-hidden="true">↗</span></a></div>
+        <div class="table-wrap"><table class="spec-table"><caption>주요 작업 묶음과 검증 기준</caption><thead><tr><th scope="col">작업</th><th scope="col">관련 화면</th><th scope="col">완료 기준</th></tr></thead><tbody><tr><th scope="row">회원·인증</th><td>C01–C03, A01</td><td>초대 코드·메일 인증·역할별 접근과 실패 흐름 검증</td></tr><tr><th scope="row">모니터링</th><td>U01–U02, O01–O02</td><td>실제 상태 수신·갱신 시각·연결 중단 표현 검증</td></tr><tr><th scope="row">예약</th><td>U03–U06</td><td>등록·변경·취소·조기 종료와 동시 예약 충돌 검증</td></tr><tr><th scope="row">알림·관리·통계</th><td>U07–U08, O01–O02, A01–A03</td><td>권한·읽음·정책 적용·예약 시간 집계 검증</td></tr><tr><th scope="row">반응형·접근성</th><td>M01–M02 및 공통</td><td>좁은 화면·키보드·로딩·빈 결과·오류 흐름 검증</td></tr><tr><th scope="row">IaC·HA</th><td>공통 인프라</td><td>템플릿 재현성과 확장·축소·장애 복구 결과 기록</td></tr></tbody></table></div>
+      </section>
+
+      <section id="repositories" class="content-section section-anchor" aria-labelledby="repos-title">
+        <div class="section-heading"><span class="section-number">07 / SOURCE & TECHNOLOGY</span><h2 id="repos-title">서비스별 역할을 나누어 개발합니다.</h2><p>저장소별 README에서 현재 설정과 개발 범위를 확인할 수 있습니다.</p></div>
+        <div class="repo-list"><a class="repo-row" href="https://github.com/2026-2-web-programming-term-project/WP-TP-Front"><span class="repo-index">01</span><div><h3>WP-TP-Front <span>↗</span></h3><p>Thymeleaf · HTML · CSS · JavaScript</p></div><span class="tag">초기 프로젝트</span></a><a class="repo-row" href="https://github.com/2026-2-web-programming-term-project/WP-TP-Gateway"><span class="repo-index">02</span><div><h3>WP-TP-Gateway <span>↗</span></h3><p>서비스 라우팅 · 공통 요청 처리</p></div><span class="tag">초기 프로젝트</span></a><a class="repo-row" href="https://github.com/2026-2-web-programming-term-project/WP-TP-API"><span class="repo-index">03</span><div><h3>WP-TP-API <span>↗</span></h3><p>인증 · 자원 · 예약 · 알림 · 관리 · 통계</p></div><span class="tag">초기 프로젝트</span></a><a class="repo-row" href="https://github.com/2026-2-web-programming-term-project/WP-TP-DB"><span class="repo-index">04</span><div><h3>WP-TP-DB <span>↗</span></h3><p>데이터 모델 · 스키마 · DB 운영</p></div><span class="tag">구현 예정</span></a><a class="repo-row" href="https://github.com/2026-2-web-programming-term-project/WP-TP-Eureka"><span class="repo-index">05</span><div><h3>WP-TP-Eureka <span>↗</span></h3><p>서비스 등록 · 주소 조회 · 디스커버리</p></div><span class="tag">구현 예정</span></a></div>
+        <details class="plain-details"><summary>현재 빌드 설정과 미확정 기술 선택</summary><div class="details-content"><p>2026-11-02 기준 Front·API·Gateway는 Java toolchain 25와 Gradle Wrapper 9.8.2를 선언합니다. Spring Boot는 Front 4.1.2, API·Gateway 4.0.0입니다. 버전 호환성과 실행은 별도 검증 대상입니다.</p><p>Gateway는 WebFlux·WebMVC starter가 함께 선언되어 있어 실행 방식을 선택할 예정입니다. 제안서의 예상 DB는 MySQL이며 API 초기 설정은 MariaDB JDBC 드라이버를 사용합니다. 최종 DB 엔진과 Cassandra·Redis·RabbitMQ 등의 사용 여부는 기능·운영 요구에 따라 정합니다.</p><p><a href="https://github.com/2026-2-web-programming-term-project/.github/blob/main/README.md">현재 설정과 상세 설계 방향을 공통 README에서 확인하기 ↗</a></p></div></details>
+        <div class="document-link"><div><span class="tiny-label">PROJECT HUB</span><h3>코드와 문서를 함께 확인하세요.</h3><p>소개 페이지는 정적 문서 사이트입니다. 실제 예약·모니터링 서비스는 별도 배포 대상입니다.</p></div><a class="button primary" href="https://github.com/2026-2-web-programming-term-project">오거니제이션 열기 <span aria-hidden="true">↗</span></a></div>
+      </section>
+      <footer class="footer"><span>2026 WEB PROGRAMMING TERM PROJECT</span><p>연구실 GPU 서버 자원 예약 및 실시간 모니터링 시스템</p><div><span>문서 기준 2026.11.02 · 계획과 구현 상태는 구분해 기록합니다.</span><a href="#overview">맨 위로 ↑</a></div></footer>
+    </main>
+  </div>
+
+  <dialog id="screen-dialog" aria-labelledby="dialog-title"><div class="dialog-heading"><h2 id="dialog-title">설계 화면</h2><button id="close-dialog" type="button" aria-label="화면 확대 닫기">닫기 <span aria-hidden="true">×</span></button></div><img id="dialog-image" src="assets/ui/U01.png" alt="확대한 설계 화면" width="1440" height="760"><p>UI 설계서의 와이어프레임 · 표시 데이터는 예시입니다. ESC 키로 닫을 수 있습니다.</p></dialog>
+</body>
+</html>
